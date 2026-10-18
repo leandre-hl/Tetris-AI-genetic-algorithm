@@ -1,6 +1,6 @@
 [🇫🇷 Français](README.fr.md) | [🇬🇧 English](README.md)
 
-# IA de Tetris entraînée par algorithme génétique
+# IA Tetris entraînée par algorithme génétique
 
 Un bot de Tetris écrit en OCaml, dont le comportement est contrôlé par 20 coefficients optimisés à l'aide d'un algorithme génétique.
 
