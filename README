@@ -49,10 +49,9 @@ Evaluating 100 games per individual, with strong bots surviving hundreds of thou
 |---|---:|
 | Random bot | Less than 1 line per game |
 | Best individual (generation 51) | ~348,500 lines per game |
-| Elite mean after 52 generations | ~250,000–280,000 lines per game |
 | Training duration | Approximately 6 days on a mid laptop |
 
-![graph](image-1.png)
+![graph](results/best_score_evolution.png)
 
 The best individual and fitness history are available in `results/best_individual.txt` and `results/fitness_history.csv`.
 
