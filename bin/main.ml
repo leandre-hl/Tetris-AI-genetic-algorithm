@@ -12,7 +12,7 @@ let parameters : Genetic.parameters =
   {
     (* Directory where generations are saved. It must be a single-level path
        (e.g. "runs"), because [Sys.mkdir] does not create parent directories. *)
-    dir_save = save_dir;
+    dir_save = "training_data";
 
     (* Resume a previous run?
        - None    : start from a random population

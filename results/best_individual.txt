@@ -1,0 +1,9 @@
+# Best Tetris bot found by the genetic algorithm
+# Training time : 6 days on a mid laptop, while testing.
+# Genotype: the 20 weights of Tetris.eval, in the order of Tetris.name_params.
+#           The bot plays the placement with the lowest weighted cost.
+# Selection : The top individuals computed by the algorithm were compared
+              on many games for precise selection
+#           (16x10 board, no next-piece preview).
+
+Genotype: 0.007290 -0.025475 0.011876; 0.008772 0.052498 0.125259 0.099355 0.047632 -0.029017 -0.050861 0.131532 0.057433 0.040383 0.013972 0.020726 0.111634 0.001838 -0.081384 -0.079684 0.003377
