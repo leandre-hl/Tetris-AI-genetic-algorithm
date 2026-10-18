@@ -53,9 +53,9 @@ Evaluating 100 games per individual, with strong bots surviving hundreds of thou
 | Fitness evaluation | Mean over 100 games per individual |
 | Training duration | Approximately 6 days on a laptop |
 
-![Best score evolution](results/best_score_evolution.png)
+![Best score evolution](my_results/best_score_evolution.png)
 
-The best individual and fitness history are available in [`results/best_individual.txt`](results/best_individual.txt) and [`results/fitness_history.csv`](results/fitness_history.csv).
+The best individual and fitness history are available in [`my_results/best_individual.txt`](my_results/best_individual.txt) and [`my_results/fitness_history.csv`](my_results/fitness_history.csv).
 
 Fitness estimates are noisy. The strongest candidates were compared over many games to support final selection. For a more rigorous benchmark, candidates should be evaluated on shared piece sequences and the final score should be measured on separate evaluation games.
 
@@ -86,7 +86,7 @@ Some feature quirks are intentionally preserved because the trained weights depe
 ├── src/
 │   ├── tetris.ml
 │   └── genetic.ml
-├── results/
+├── my_results/
 │   ├── best_individual.txt
 │   ├── fitness_history.csv
 │   └── best_score_evolution.png
@@ -102,7 +102,7 @@ The tree above highlights the main project files; additional build and training-
 | `bin/main.ml` | Entry point and training parameters |
 | `src/tetris.ml` | Board, rules, features, evaluation, and simulation |
 | `src/genetic.ml` | Genetic operators, parallel evaluation, saving, and loading |
-| `results/` | My training results |
+| `my_results/` | My training results |
 
 ## 8. Build and Run
 

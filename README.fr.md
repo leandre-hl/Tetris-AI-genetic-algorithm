@@ -53,9 +53,9 @@ L'évaluation de 100 parties par individu, alors que les meilleurs bots surviven
 | Évaluation de la fitness | Moyenne sur 100 parties par individu |
 | Durée de l'entraînement | Environ 6 jours sur un ordinateur portable |
 
-![Évolution du meilleur score](results/best_score_evolution.png)
+![Évolution du meilleur score](my_results/best_score_evolution.png)
 
-Le meilleur individu et l'historique des évaluations sont disponibles dans [`results/best_individual.txt`](results/best_individual.txt) et [`results/fitness_history.csv`](results/fitness_history.csv).
+Le meilleur individu et l'historique des évaluations sont disponibles dans [`my_results/best_individual.txt`](my_results/best_individual.txt) et [`my_results/fitness_history.csv`](my_results/fitness_history.csv).
 
 Les estimations de fitness sont bruitées. Les candidats les plus performants ont été comparés sur un grand nombre de parties afin d'étayer le choix final. Pour obtenir un benchmark plus rigoureux, il faudrait évaluer les candidats sur les mêmes séquences de pièces, puis mesurer le score final sur des parties distinctes de celles utilisées pendant l'entraînement.
 
@@ -86,7 +86,7 @@ Certaines particularités des caractéristiques sont volontairement conservées,
 ├── src/
 │   ├── tetris.ml
 │   └── genetic.ml
-├── results/
+├── my_results/
 │   ├── best_individual.txt
 │   ├── fitness_history.csv
 │   └── best_score_evolution.png
@@ -102,7 +102,7 @@ L'arborescence ci-dessus présente les principaux fichiers du projet ; d'autres 
 | `bin/main.ml` | Point d'entrée et paramètres d'entraînement |
 | `src/tetris.ml` | Plateau, règles, caractéristiques, évaluation et simulation |
 | `src/genetic.ml` | Opérateurs génétiques, évaluation parallèle, sauvegarde et chargement |
-| `results/` | Mes résultats d'entraînement |
+| `my_results/` | Mes résultats d'entraînement |
 
 ## 8. Compilation et exécution
 
