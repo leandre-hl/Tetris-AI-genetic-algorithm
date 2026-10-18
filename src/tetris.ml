@@ -360,8 +360,8 @@ let name_params = [|
   "      holes        ";
   " mean depth holes  ";
   "    nb big holes   ";
-  "       bol         ";
-  "  bol quadratique  ";
+  "       bowl        ";
+  "  quadratic bowl   ";
   "nb lines with holes";
   "       exp1        ";
   "       exp2        ";
@@ -458,14 +458,14 @@ let play_game indiv seed eval =
    random games. Returns (fitness, true); the boolean means "fully evaluated"
    and is only kept for genetic.ml. [_last_average] is unused: it belonged to a
    pruning rule that stopped evaluating unpromising individuals early. *)
-let mean_score indiv nb_games eval _last_average =
+let mean_score indiv nb_games eval (*_last_average*) =
   Random.self_init ();
   let sum = ref 0. in
   for _game = 1 to nb_games do
     let seed = Random.int 1073741823 in
     sum := !sum +. float_of_int (play_game indiv seed eval)
   done;
-  (!sum /. float_of_int nb_games, true)
+  !sum /. float_of_int nb_games
 
 (* ------------------------------------------------------------------------- *)
 (* Debugging                                                                 *)

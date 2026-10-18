@@ -288,26 +288,37 @@ let evaluate_candidate candidate =
 
 (* Evaluate a whole population in parallel on the domain pool [pool]. The
    returned list keeps the order of [population]. *)
-let evaluate_population pool population =
+let evaluate_population population =
   let candidates = Array.of_list population in
   let total = Array.length candidates in
   let results = Array.make total None in
   (* Shared between domains, hence atomic. *)
+  let next = Atomic.make 0 in
   let completed = Atomic.make 0 in
+  let worker () =
+    let running = ref true in
+    while !running do
+      let i = Atomic.fetch_and_add next 1 in
+      if i >= total then running := false
+      else begin
+        let evaluated = evaluate_candidate candidates.(i) in
+        results.(i) <- Some evaluated;
+        let done_count = Atomic.fetch_and_add completed 1 + 1 in
+        Printf.printf "\rCandidate %02d got a mean score of %f\n%!" i
+          (fitness_value evaluated);
+        print_progress done_count total
+      end
+    done
+  in
   Printf.printf "Evaluating %d candidates...\n%!" total;
   print_progress 0 total;
-  Domainslib.Task.run pool (fun () ->
-      Domainslib.Task.parallel_for ~start:0 ~finish:(total - 1)
-        ~body:(fun i ->
-            let evaluated = evaluate_candidate candidates.(i) in
-            results.(i) <- Some evaluated;
-            let done_count = Atomic.fetch_and_add completed 1 + 1 in
-            Printf.printf "\rCandidate %02d got a mean score of %f\n%!" i
-              (fitness_value evaluated);
-            print_progress done_count total)
-        pool);
+  let n_workers = max 1 (min total (Domain.recommended_domain_count ())) in
+  let domains = List.init (n_workers - 1) (fun _ -> Domain.spawn worker) in
+  worker ();
+  List.iter Domain.join domains;
   print_newline ();
   results |> Array.to_list |> List.filter_map Fun.id
+
 
 (* ------------------------------------------------------------------------- *)
 (* Main loop                                                                 *)
@@ -319,58 +330,50 @@ let evaluate_population pool population =
    [dir_save/data.csv], so a long run can be stopped and resumed with
    [load = Some n]. *)
 let genetic_algorithm parameters =
-  
-  (* Setup the domain pool for parallel evaluation. *)
-  let pool =
-    Domainslib.Task.setup_pool ~num_domains:(Domain.recommended_domain_count ()) ()
+  (* Initial population: random, or the children of a saved elite. *)
+  let population =
+    ref (match parameters.load with
+        | None ->
+            List.init parameters.population_size (fun _ ->
+                random_candidate parameters.n_genes parameters.init_sigma)
+        | Some generation ->
+            let file = generation_file parameters.dir_save generation in
+            let elite = load_population file in
+            Printf.printf "Loaded %d individuals from %s\n%!"
+              (List.length elite) file;
+            new_population elite parameters)
   in
-  Fun.protect
-    ~finally:(fun () -> Domainslib.Task.teardown_pool pool)
-    (fun () ->
-       (* Initial population: random, or the children of a saved elite. *)
-       let population =
-         ref (match parameters.load with
-             | None ->
-                 List.init parameters.population_size (fun _ ->
-                     random_candidate parameters.n_genes parameters.init_sigma)
-             | Some generation ->
-                 let file = generation_file parameters.dir_save generation in
-                 let elite = load_population file in
-                 Printf.printf "Loaded %d individuals from %s\n%!"
-                   (List.length elite) file;
-                 new_population elite parameters)
-       in
-       let first_generation =
-         match parameters.load with None -> 1 | Some n -> n + 1
-       in
-       let record = ref 0. and record_generation = ref 0 in
-
-       for generation = first_generation to parameters.n_generations do
-         let start_time = Unix.gettimeofday () in
-
-         (* Evaluate everybody and keep the best. *)
-         let evaluated = evaluate_population pool !population in
-         let elite = select_elite evaluated parameters.n_elite in
-         let best = List.hd elite in
-         let best_fitness = fitness_value best in
-         let elite_mean = mean_fitness elite in
-         if best_fitness > !record then begin
-           record := best_fitness;
-           record_generation := generation
-         end;
-
-         (* Save the elite and log the generation. *)
-         save_population (generation_file parameters.dir_save generation) elite;
-         append_stats (Filename.concat parameters.dir_save "data.csv")
-           elite_mean best_fitness;
-         print_generation_report ~generation ~best ~elite ~elite_mean
-           ~record:!record ~record_generation:!record_generation
-           ~elapsed:(Unix.gettimeofday () -. start_time);
-
-         (* Children of the elite form the next population. *)
-         population := new_population elite parameters
-       done;
-
-       (* Evaluate the last population and return its best individual. *)
-       let final_population = evaluate_population pool !population in
-       List.hd (List.sort by_decreasing_fitness final_population))
+  let first_generation =
+    match parameters.load with None -> 1 | Some n -> n + 1
+  in
+  let record = ref 0. and record_generation = ref 0 in
+ 
+  for generation = first_generation to parameters.n_generations do
+    let start_time = Unix.gettimeofday () in
+ 
+    (* Evaluate everybody and keep the best. *)
+    let evaluated = evaluate_population !population in
+    let elite = select_elite evaluated parameters.n_elite in
+    let best = List.hd elite in
+    let best_fitness = fitness_value best in
+    let elite_mean = mean_fitness elite in
+    if best_fitness > !record then begin
+      record := best_fitness;
+      record_generation := generation
+    end;
+ 
+    (* Save the elite and log the generation. *)
+    save_population (generation_file parameters.dir_save generation) elite;
+    append_stats (Filename.concat parameters.dir_save "data.csv")
+      elite_mean best_fitness;
+    print_generation_report ~generation ~best ~elite ~elite_mean
+      ~record:!record ~record_generation:!record_generation
+      ~elapsed:(Unix.gettimeofday () -. start_time);
+ 
+    (* Children of the elite form the next population. *)
+    population := new_population elite parameters
+  done;
+ 
+  (* Evaluate the last population and return its best individual. *)
+  let final_population = evaluate_population !population in
+  List.hd (List.sort by_decreasing_fitness final_population)
